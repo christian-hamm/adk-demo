@@ -1,0 +1,9 @@
+{
+    "python.testing.pytestArgs": [
+        "newsletter-agent"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.defaultInterpreterPath": "./newsletter-agent/.venv/bin/python",
+    "python.envFile": "${workspaceFolder}/newsletter-agent/.env"
+}
