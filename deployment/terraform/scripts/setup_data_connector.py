@@ -78,6 +78,11 @@ def _build_service(location: str, project_id: str):
     type=click.Choice(["content", "document", "csv", "custom"]),
     help="Data schema for ingested files.",
 )
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force recreation by deleting the existing collection first if it exists.",
+)
 def main(
     project_id: str,
     location: str,
@@ -86,6 +91,7 @@ def main(
     gcs_uri: str,
     refresh_interval: str,
     data_schema: str,
+    force: bool,
 ) -> None:
     """Set up a GCS Data Connector for Agent Platform Search.
 
@@ -99,6 +105,7 @@ def main(
     connector_name = f"{parent}/collections/{collection_id}/dataConnector"
 
     # Check if connector already exists (singleton per collection)
+    exists = False
     try:
         existing = (
             service.projects()
@@ -112,23 +119,41 @@ def main(
             f"Data connector already exists in collection"
             f" '{collection_id}' (state: {state})"
         )
-        click.echo("Skipping creation.")
-        return
+        exists = True
     except HttpError as e:
         if e.resp.status != 404:
             raise
+
+    if exists:
+        if force:
+            click.echo(f"Force flag is set. Deleting existing collection '{collection_id}'...")
+            try:
+                collection_name = f"{parent}/collections/{collection_id}"
+                service.projects().locations().collections().delete(
+                    name=collection_name
+                ).execute()
+                click.echo("Collection deleted successfully. Proceeding with creation.")
+                time.sleep(10)
+            except Exception as e:
+                click.echo(f"Error deleting collection: {e}", err=True)
+                sys.exit(1)
+        else:
+            click.echo("Skipping creation.")
+            return
 
     click.echo(f"Creating data connector '{display_name}'...")
 
     # Entity params vary by data schema (see API reference):
     # - "content": unstructured files (PDF, HTML, TXT). IDs are auto-generated
     #   from SHA256(URI). Needs CONTENT_REQUIRED for raw file storage.
+    #   We explicitly set auto_generate_ids to False to override defaulting.
     # - "document": structured NDJSON with Document.id in each line.
     # - "csv"/"custom": structured data; auto_generate_ids creates IDs from
     #   payload hash (only valid for these schemas per the API spec).
     entity_params = {"data_schema": data_schema}
     if data_schema == "content":
         entity_params["content_config"] = "CONTENT_REQUIRED"
+        entity_params["auto_generate_ids"] = False
     elif data_schema in ("csv", "custom"):
         entity_params["auto_generate_ids"] = True
 

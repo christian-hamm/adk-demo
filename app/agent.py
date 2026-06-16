@@ -44,7 +44,7 @@ vertexai.init(project=project_id, location=LOCATION)
 
 
 data_store_region = os.getenv("DATA_STORE_REGION", "global")
-data_store_id = os.getenv("DATA_STORE_ID", "newsletter-agent-collection_documents")
+data_store_id = os.getenv("DATA_STORE_ID", "newsletter-agent-collection-v2_documents")
 data_store_path = (
     f"projects/{project_id}/locations/{data_store_region}"
     f"/collections/default_collection/dataStores/{data_store_id}"

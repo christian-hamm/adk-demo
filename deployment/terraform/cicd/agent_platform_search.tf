@@ -30,12 +30,12 @@ resource "null_resource" "data_connector_staging" {
   triggers = {
     project_id    = var.staging_project_id
     location      = var.data_store_region
-    collection_id = "${var.project_name}-collection"
+    collection_id = "${var.project_name}-collection-v2"
     scripts_dir   = "${path.module}/../scripts"
   }
 
   provisioner "local-exec" {
-    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.staging_project_id} ${var.data_store_region} ${var.project_name}-collection ${var.project_name} gs://${google_storage_bucket.docs_bucket["staging"].name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
+    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.staging_project_id} ${var.data_store_region} ${var.project_name}-collection-v2 ${var.project_name} gs://${google_storage_bucket.docs_bucket["staging"].name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
   }
 
   provisioner "local-exec" {
@@ -51,12 +51,12 @@ resource "null_resource" "data_connector_prod" {
   triggers = {
     project_id    = var.prod_project_id
     location      = var.data_store_region
-    collection_id = "${var.project_name}-collection"
+    collection_id = "${var.project_name}-collection-v2"
     scripts_dir   = "${path.module}/../scripts"
   }
 
   provisioner "local-exec" {
-    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.prod_project_id} ${var.data_store_region} ${var.project_name}-collection ${var.project_name} gs://${google_storage_bucket.docs_bucket["prod"].name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
+    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.prod_project_id} ${var.data_store_region} ${var.project_name}-collection-v2 ${var.project_name} gs://${google_storage_bucket.docs_bucket["prod"].name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
   }
 
   provisioner "local-exec" {
@@ -74,7 +74,7 @@ data "external" "data_store_id_staging" {
   query = {
     project_id    = var.staging_project_id
     location      = var.data_store_region
-    collection_id = "${var.project_name}-collection"
+    collection_id = "${var.project_name}-collection-v2"
   }
 
   depends_on = [null_resource.data_connector_staging]
@@ -87,7 +87,7 @@ data "external" "data_store_id_prod" {
   query = {
     project_id    = var.prod_project_id
     location      = var.data_store_region
-    collection_id = "${var.project_name}-collection"
+    collection_id = "${var.project_name}-collection-v2"
   }
 
   depends_on = [null_resource.data_connector_prod]

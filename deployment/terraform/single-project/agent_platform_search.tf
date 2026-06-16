@@ -29,12 +29,12 @@ resource "null_resource" "data_connector" {
   triggers = {
     project_id      = var.project_id
     location        = var.data_store_region
-    collection_id   = "${var.project_name}-collection"
+    collection_id   = "${var.project_name}-collection-v2"
     scripts_dir     = "${path.module}/../scripts"
   }
 
   provisioner "local-exec" {
-    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.project_id} ${var.data_store_region} ${var.project_name}-collection ${var.project_name} gs://${google_storage_bucket.docs_bucket.name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
+    command = "uv run ${path.module}/../scripts/setup_data_connector.py ${var.project_id} ${var.data_store_region} ${var.project_name}-collection-v2 ${var.project_name} gs://${google_storage_bucket.docs_bucket.name} --refresh-interval ${var.data_connector_refresh_interval} --data-schema ${var.data_connector_data_schema}"
   }
 
   provisioner "local-exec" {
@@ -52,7 +52,7 @@ data "external" "data_store_id" {
   query = {
     project_id    = var.project_id
     location      = var.data_store_region
-    collection_id = "${var.project_name}-collection"
+    collection_id = "${var.project_name}-collection-v2"
   }
 
   depends_on = [null_resource.data_connector]
