@@ -1,15 +1,13 @@
-name: "newsletter-agent"
-acli_version: "0.5.0"
-agent_directory: "app"
-region: "us-central1"
-base_template: "agentic_rag"
-generated_at: "2026-06-16T04:57:47.276125+00:00"
-language: "python"
+name: newsletter-agent
+acli_version: 0.5.0
+agent_directory: app
+region: us-central1
+base_template: agentic_rag
+generated_at: '2026-06-16T04:57:47.276125+00:00'
+language: python
 create_params:
-  deployment_target: "agent_runtime"
-  session_type: "none"
-  cicd_runner: "skip"
+  deployment_target: agent_runtime
+  cicd_runner: github_actions
   include_data_ingestion: true
-  
-  datastore: "agent_platform_search"
-  agent_guidance_filename: "GEMINI.md"
+  datastore: agent_platform_search
+  agent_guidance_filename: GEMINI.md
