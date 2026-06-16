@@ -1,0 +1,34 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "greeting",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Hello, what can you help me with?"}]
+      }
+    },
+    {
+      "eval_case_id": "document_query",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "What information do you have in your knowledge base?"}]
+      }
+    },
+    {
+      "eval_case_id": "cv_submission",
+      "prompt": {
+        "role": "user",
+        "parts": [{
+          "text": "Here is my CV:\n- Skills: Kubernetes, Docker, Python, GCP pipelines, MLOps\n- Background: Cloud platform engineer with 5 years experience."
+        }]
+      }
+    },
+    {
+      "eval_case_id": "newsletter_request",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Can you draft today's personalized newsletter for me?"}]
+      }
+    }
+  ]
+}
