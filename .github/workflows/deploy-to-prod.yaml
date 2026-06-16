@@ -36,6 +36,9 @@ jobs:
     environment:
       name: production
     concurrency: production
+    defaults:
+      run:
+        working-directory: ./newsletter-agent
     permissions:
       contents: 'read'
       id-token: 'write'
