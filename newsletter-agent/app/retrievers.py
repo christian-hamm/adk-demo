@@ -15,7 +15,33 @@
 import os
 from collections.abc import Callable
 
-from google.adk.tools import VertexAiSearchTool
+from google.adk.tools import ToolContext, VertexAiSearchTool
+
+
+def set_preferred_language(language: str, tool_context: ToolContext) -> dict:
+    """Sets the users preferred language for communications and newsletters.
+
+    Args:
+        language: The target language name or code (e.g. 'German', 'English', 'de', 'en')
+    """
+    lang_lower = language.lower().strip()
+
+    german_variants = ["de", "german", "deutsch"]
+    english_variants = ["en", "english", "englisch"]
+
+    if lang_lower in german_variants:
+        canoncial_lang = "Deutsch"
+    elif lang_lower in english_variants:
+        canoncial_lang = "English"
+    else:
+        return {"status": "error", "message": f"Unsupported language: '{language}'"}
+
+    tool_context.state["user:preferred_language"] = canoncial_lang
+
+    return {
+        "status": "success",
+        "message": f"Preferred language successfully set to {canoncial_lang}",
+    }
 
 
 def create_search_tool(
@@ -30,7 +56,10 @@ def create_search_tool(
         VertexAiSearchTool instance or mock function for testing.
     """
     # For integration tests or local sandbox, return a realistic mock instead of the real tool
-    if os.getenv("INTEGRATION_TEST") == "TRUE" or os.getenv("LOCAL_PLAYGROUND") == "TRUE":
+    if (
+        os.getenv("INTEGRATION_TEST") == "TRUE"
+        or os.getenv("LOCAL_PLAYGROUND") == "TRUE"
+    ):
 
         def mock_search(query: str) -> str:
             """Mock Agent Platform Search returning rich keyword-based tech news."""

@@ -24,7 +24,7 @@ from google.adk.models import Gemini
 from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 from google.genai import types
 
-from app.retrievers import create_search_tool
+from app.retrievers import create_search_tool, set_preferred_language
 
 # Load environment variables from .env file
 load_dotenv()
@@ -43,9 +43,7 @@ vertexai.init(project=project_id, location=LOCATION)
 
 
 data_store_region = os.getenv("DATA_STORE_REGION", "global")
-data_store_id = os.getenv(
-    "DATA_STORE_ID", "newsletter-agent-collection_documents"
-)
+data_store_id = os.getenv("DATA_STORE_ID", "newsletter-agent-collection_documents")
 data_store_path = (
     f"projects/{project_id}/locations/{data_store_region}"
     f"/collections/default_collection/dataStores/{data_store_id}"
@@ -54,7 +52,19 @@ data_store_path = (
 vertex_search_tool = create_search_tool(data_store_path)
 
 
+async def initialize_defaults(callback_context: CallbackContext) -> None:
+    """Ensures default settings are loaded into user state if not already set"""
+
+    if "user:preferred_language" not in callback_context.state:
+        callback_context.state["user:preferred_language"] = "English"
+
+
 instruction = """You are a highly personalized AI Newsletter Agent. Your goal is to keep users informed about major tech and industry developments tailored specifically to their professional skillset and background.
+
+Rules:
+- You are strictly bilingual. You are only allowed to communicate in English or German.
+- The user's active preferred language is currently: {user:preferred_language}.
+- You MUST draft the newsletter and respond in this language.
 
 You have access to two major capabilities:
 1. **Memory Bank** (via PreloadMemoryTool): This automatically preloads the user's professional profile, skills, and preferences from previous interactions.
@@ -62,7 +72,7 @@ You have access to two major capabilities:
 
 How you handle user requests:
 - **CV / Resume Submission**: If the user submits or copy-pastes a CV, carefully analyze it to extract their core skills, technologies, and professional interests. Acknowledge this by stating exactly which skills you have identified and will focus on. State that you have saved these preferences to your memory bank for future newsletter editions.
-- **Newsletter Request**: 
+- **Newsletter Request**:
   1. Review the preloaded memory context to retrieve the user's skill set and interests. If no profile exists, politely ask them to share their CV or specify their skills first.
   2. For each identified skill or domain (e.g., Kubernetes, Python, MLOps), construct clear and focused search queries for the Vertex AI Search Tool.
   3. Analyze the returned search results to identify major happenings, releases, or announcements.
@@ -84,7 +94,8 @@ root_agent = Agent(
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=instruction,
-    tools=[vertex_search_tool, PreloadMemoryTool()],
+    tools=[vertex_search_tool, PreloadMemoryTool(), set_preferred_language],
+    before_agent_callback=initialize_defaults,
     after_agent_callback=generate_memories_callback,
 )
 
