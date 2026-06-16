@@ -19,18 +19,15 @@ on:
     branches:
       - main
     paths:
-      - 'newsletter-agent/app/**'
-      - 'newsletter-agent/data_ingestion/**'
-      - 'newsletter-agent/tests/**'
-      - 'newsletter-agent/deployment/**'
-      - 'newsletter-agent/uv.lock'
+      - 'app/**'
+      - 'data_ingestion/**'
+      - 'tests/**'
+      - 'deployment/**'
+      - 'uv.lock'
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./newsletter-agent
     permissions:
       contents: 'read'
       id-token: 'write'
