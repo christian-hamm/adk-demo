@@ -1,21 +1,7 @@
-# Project name used for resource naming
-project_name = "newsletter-agent"
-
-# Your Production Google Cloud project id
-prod_project_id = "your-production-project-id"
-
-# Your Staging / Test Google Cloud project id
-staging_project_id = "your-staging-project-id"
-
-# Your Google Cloud project ID that will be used to host the Cloud Build pipelines.
-cicd_runner_project_id = "your-cicd-project-id"
-
-repository_owner = "Your GitHub organization or username."
-
-# Name of the repository you added to Cloud Build
-repository_name = "newsletter-agent"
-
-# The Google Cloud region you will use to deploy the infrastructure
+staging_project_id = "adk-demo-499604"
+prod_project_id = "adk-demo-prod-499613"
+cicd_runner_project_id = "adk-demo-prod-499613"
 region = "us-east1"
-#The value can only be one of "global", "us" and "eu".
-data_store_region = "global"
+repository_name = "adk-demo"
+repository_owner = "christian-hamm"
+create_repository = false
