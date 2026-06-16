@@ -14,13 +14,14 @@
 
 import os
 
-import google
+import google.auth
 import vertexai
 from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.apps import App
 from google.adk.models import Gemini
+from google.adk.tools import FunctionTool
 from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 from google.genai import types
 
@@ -83,7 +84,12 @@ How you handle user requests:
 
 async def generate_memories_callback(callback_context: CallbackContext):
     """Saves the conversation events to the Memory Bank to persist user preferences."""
-    await callback_context.add_session_to_memory()
+    try:
+        await callback_context.add_session_to_memory()
+    except ValueError as e:
+        # Gracefully handle when memory service is not available (e.g. during headless evaluations)
+        if "memory service is not available" not in str(e):
+            raise e
     return None
 
 
@@ -94,7 +100,11 @@ root_agent = Agent(
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=instruction,
-    tools=[vertex_search_tool, PreloadMemoryTool(), set_preferred_language],
+    tools=[
+        vertex_search_tool,
+        PreloadMemoryTool(),
+        FunctionTool(set_preferred_language),
+    ],
     before_agent_callback=initialize_defaults,
     after_agent_callback=generate_memories_callback,
 )
