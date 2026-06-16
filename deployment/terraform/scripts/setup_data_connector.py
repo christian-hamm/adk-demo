@@ -126,7 +126,9 @@ def main(
 
     if exists:
         if force:
-            click.echo(f"Force flag is set. Deleting existing collection '{collection_id}'...")
+            click.echo(
+                f"Force flag is set. Deleting existing collection '{collection_id}'..."
+            )
             try:
                 collection_name = f"{parent}/collections/{collection_id}"
                 service.projects().locations().collections().delete(
