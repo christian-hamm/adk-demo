@@ -22,7 +22,6 @@ on:
       - 'app/**'
       - 'data_ingestion/**'
       - 'tests/**'
-      - 'deployment/**'
       - 'uv.lock'
   workflow_dispatch:
     inputs:
