@@ -93,6 +93,14 @@ data "external" "data_store_id_prod" {
   depends_on = [null_resource.data_connector_prod]
 }
 
+resource "terraform_data" "data_store_id_staging_trigger" {
+  input = data.external.data_store_id_staging.result.data_store_id
+}
+
+resource "terraform_data" "data_store_id_prod_trigger" {
+  input = data.external.data_store_id_prod.result.data_store_id
+}
+
 # Search engine app for staging — uses default_collection as Discovery Engine places data stores there regardless of connector collectionId
 resource "google_discovery_engine_search_engine" "search_engine_staging" {
   project        = var.staging_project_id
@@ -109,7 +117,7 @@ resource "google_discovery_engine_search_engine" "search_engine_staging" {
 
   lifecycle {
     replace_triggered_by = [
-      data.external.data_store_id_staging
+      terraform_data.data_store_id_staging_trigger
     ]
   }
 }
@@ -130,7 +138,7 @@ resource "google_discovery_engine_search_engine" "search_engine_prod" {
 
   lifecycle {
     replace_triggered_by = [
-      data.external.data_store_id_prod
+      terraform_data.data_store_id_prod_trigger
     ]
   }
 }
