@@ -22,6 +22,10 @@ data "github_repository" "existing_repo" {
   full_name = "${var.repository_owner}/${var.repository_name}"
 }
 
+data "github_user" "owner" {
+  username = var.repository_owner
+}
+
 # Only create GitHub repo if create_repository is true
 resource "github_repository" "repo" {
   count       = var.create_repository ? 1 : 0
@@ -151,4 +155,27 @@ resource "github_repository_environment" "production_environment" {
     protected_branches     = false
     custom_branch_policies = true
   }
+
+  reviewers {
+    users = [data.github_user.owner.id]
+  }
+}
+
+resource "github_branch_protection" "main_protection" {
+  repository_id = var.repository_name
+  pattern       = "main"
+
+  enforce_admins = false
+
+  required_pull_request_reviews {
+    dismiss_stale_reviews           = true
+    required_approving_review_count = 1
+  }
+
+  required_status_checks {
+    strict   = true
+    contexts = ["test"]
+  }
+
+  depends_on = [github_repository.repo, data.github_repository.existing_repo]
 }
