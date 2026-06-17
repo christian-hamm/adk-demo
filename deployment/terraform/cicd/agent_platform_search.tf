@@ -109,7 +109,7 @@ resource "google_discovery_engine_search_engine" "search_engine_staging" {
 
   lifecycle {
     replace_triggered_by = [
-      null_resource.data_connector_staging
+      data.external.data_store_id_staging
     ]
   }
 }
@@ -130,7 +130,7 @@ resource "google_discovery_engine_search_engine" "search_engine_prod" {
 
   lifecycle {
     replace_triggered_by = [
-      null_resource.data_connector_prod
+      data.external.data_store_id_prod
     ]
   }
 }
