@@ -15,8 +15,18 @@
 name: Deploy to Production
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - 'data_ingestion/**'
+      - 'tests/**'
+      - 'deployment/**'
+      - 'uv.lock'
   workflow_dispatch:
   workflow_call:
+
 
 jobs:
   deploy:

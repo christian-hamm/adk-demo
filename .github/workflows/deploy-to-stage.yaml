@@ -12,21 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Deploy to Staging
+name: Deploy to Stage
 
 on:
   push:
     branches:
-      - main
+      - dev
     paths:
       - 'app/**'
       - 'data_ingestion/**'
       - 'tests/**'
       - 'deployment/**'
       - 'uv.lock'
+  workflow_dispatch:
+    inputs:
+      run_load_tests:
+        description: 'Run optional load tests?'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
-  deploy_and_test_staging:
+  deploy_to_stage:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -71,12 +78,14 @@ jobs:
 
       - name: Fetch Auth Token
         id: fetch-token
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_load_tests == true }}
         run: |
           _AUTH_TOKEN=$(gcloud auth print-access-token -q)
           echo "::add-mask::${_AUTH_TOKEN}"
           echo "_auth_token=${_AUTH_TOKEN}" >> $GITHUB_OUTPUT
 
       - name: Run load test
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_load_tests == true }}
         run: |
           export _AUTH_TOKEN="${{ steps.fetch-token.outputs._auth_token }}"
           uvx locust==2.31.1 \
@@ -87,6 +96,7 @@ jobs:
           --html=tests/load_test/.results/report.html
 
       - name: Export Load Test Results to GCS
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_load_tests == true }}
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           gcloud storage cp --recursive tests/load_test/.results gs://${{ vars.LOGS_BUCKET_NAME_STAGING }}/load-test-results/results-${TIMESTAMP} --quiet
@@ -94,11 +104,3 @@ jobs:
           echo "Load test results copied to gs://${{ vars.LOGS_BUCKET_NAME_STAGING }}/load-test-results/results-${TIMESTAMP}"
           echo "HTTP link: https://console.cloud.google.com/storage/browser/${{ vars.LOGS_BUCKET_NAME_STAGING }}/load-test-results/results-${TIMESTAMP}"
           echo "_________________________________________________________________________"
-
-  call_production_workflow:
-    needs: deploy_and_test_staging
-    uses: ./.github/workflows/deploy-to-prod.yaml
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    secrets: inherit

@@ -179,3 +179,23 @@ resource "github_branch_protection" "main_protection" {
 
   depends_on = [github_repository.repo, data.github_repository.existing_repo]
 }
+
+resource "github_branch_protection" "dev_protection" {
+  repository_id = var.repository_name
+  pattern       = "dev"
+
+  enforce_admins = false
+
+  required_pull_request_reviews {
+    dismiss_stale_reviews           = true
+    required_approving_review_count = 1
+  }
+
+  required_status_checks {
+    strict   = true
+    contexts = ["test"]
+  }
+
+  depends_on = [github_repository.repo, data.github_repository.existing_repo]
+}
+
