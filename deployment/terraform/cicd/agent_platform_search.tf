@@ -106,6 +106,12 @@ resource "google_discovery_engine_search_engine" "search_engine_staging" {
   }
   provider   = google.staging_billing_override
   depends_on = [null_resource.data_connector_staging]
+
+  lifecycle {
+    replace_triggered_by = [
+      data.external.data_store_id_staging
+    ]
+  }
 }
 
 # Search engine app for prod — uses default_collection (see staging comment above)
@@ -121,5 +127,11 @@ resource "google_discovery_engine_search_engine" "search_engine_prod" {
   }
   provider   = google.prod_billing_override
   depends_on = [null_resource.data_connector_prod]
+
+  lifecycle {
+    replace_triggered_by = [
+      data.external.data_store_id_prod
+    ]
+  }
 }
 
