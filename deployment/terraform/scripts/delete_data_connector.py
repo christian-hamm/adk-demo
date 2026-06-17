@@ -68,6 +68,9 @@ def main(project_id: str, location: str, collection_id: str) -> None:
     except HttpError as e:
         if e.resp.status == 404:
             click.echo("Collection not found (already deleted).")
+        elif e.resp.status == 400 and "currently exists in list" in str(e):
+            click.echo("Warning: Collection is still linked to a search engine. Skipping deletion during destroy step to allow Terraform to update references. You can manually delete it later if needed.")
+            sys.exit(0)
         else:
             click.echo(f"Error deleting collection: {e}", err=True)
             sys.exit(1)
